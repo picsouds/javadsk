@@ -37,6 +37,16 @@ Projet Gradle. Nécessite un JDK 21+ pour compiler (Gradle/JUnit 6) ; le jar pro
 Le jar exécutable est généré dans `build/libs/javadsk-x.x.x.jar` (`x.x.x` = la version courante,
 définie dans `build.gradle.kts`).
 
+> [!NOTE]
+> **Sous Windows (PowerShell)**, les caractères accentués peuvent s'afficher mal (`tokenis├®` au
+> lieu de `tokenisé`) : la sortie est en UTF-8, mais la console attend souvent un autre encodage.
+> `chcp 65001` ne suffit pas toujours (propre à chaque fenêtre, et pas toujours pris en compte par
+> PowerShell). Le correctif fiable :
+> ```powershell
+> [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+> ```
+> à exécuter une fois par session PowerShell avant de lancer `java -jar ...`.
+
 ## Utilisation
 
 ```
