@@ -26,7 +26,8 @@ Le projet permet de :
 
 ## Compilation
 
-Projet Gradle, Java 11.
+Projet Gradle. Nécessite un JDK 21+ pour compiler (Gradle/JUnit 6) ; le jar produit cible Java 11
+(`compileJava.options.release`), donc exécutable sur un JRE 11 ou plus récent.
 
 ```
 ./gradlew build      # compile + exécute les tests
