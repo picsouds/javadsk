@@ -10,8 +10,15 @@ version = "1.0.0"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        // 21 (LTS) fait tourner Gradle/les tests/JUnit 6 (qui exige 17+) ; le jar produit reste
+        // Java 11 grâce à compileJava.options.release ci-dessous, indépendamment du JDK utilisé
+        // pour compiler.
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
+}
+
+tasks.compileJava {
+    options.release.set(11)
 }
 
 application {
@@ -37,7 +44,7 @@ dependencies {
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("org.tukaani:xz:1.12")
 
-    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
