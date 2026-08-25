@@ -37,7 +37,7 @@ dependencies {
     implementation("org.apache.commons:commons-compress:1.26.2")
     implementation("org.tukaani:xz:1.9")
 
-    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
