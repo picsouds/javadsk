@@ -1,5 +1,10 @@
 # javadsk
 
+[![Build Status](https://github.com/picsouds/javadsk/actions/workflows/build.yml/badge.svg)](https://github.com/picsouds/javadsk/actions/workflows/build.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=picsouds_javadsk&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=picsouds_javadsk)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=picsouds_javadsk&metric=bugs)](https://sonarcloud.io/summary/new_code?id=picsouds_javadsk)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=picsouds_javadsk&metric=coverage)](https://sonarcloud.io/summary/new_code?id=picsouds_javadsk)
+
 javadsk est une bibliothèque Java et un outil en ligne de commande pour manipuler des images de
 disquette Amstrad CPC (`.dsk` / `.edsk`).
 
