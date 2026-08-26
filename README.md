@@ -38,10 +38,10 @@ Le jar exécutable est généré dans `build/libs/javadsk-x.x.x.jar` (`x.x.x` = 
 définie dans `build.gradle.kts`).
 
 > [!NOTE]
-> **Sous Windows (PowerShell)**, les caractères accentués peuvent s'afficher mal (`tokenis├®` au
+> **Sous Windows (PowerShell)**, les caractères accentués peuvent mal s'afficher (`tokenis├®` au
 > lieu de `tokenisé`) : la sortie est en UTF-8, mais la console attend souvent un autre encodage.
-> `chcp 65001` ne suffit pas toujours (propre à chaque fenêtre, et pas toujours pris en compte par
-> PowerShell). Le correctif fiable :
+> 
+> Le correctif :
 > ```powershell
 > [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 > ```
@@ -191,6 +191,16 @@ représentés par un équivalent Unicode lisible et réversible plutôt que l'oc
 > La source de `--tokenize` doit toujours être la sortie de `basic --spaced`, jamais celle de
 > `basic` (listing compact, sans les espaces). Sans ces espaces, le retokeniseur ne peut pas
 > délimiter les mots-clés collés les uns aux autres et produira un fichier incorrect.
+
+> [!TIP]
+> Pour éditer le fichier produit par `--spaced` avec une coloration syntaxique BASIC dans
+> [Geany](https://www.geany.org/) : copier
+> [`editors/geany/filetypes.cpcbasic.conf`](editors/geany/filetypes.cpcbasic.conf) vers
+> `~/.config/geany/filedefs/filetypes.cpcbasic.conf` (Linux/macOS) ou
+> `%APPDATA%\geany\filedefs\filetypes.cpcbasic.conf` (Windows) puis redémarrer Geany.
+>
+> Sélectionner ensuite manuellement Document > Définir le type de fichier > CPCBasic après
+> ouverture du fichier.
 
 #### NB `--spaced`
 
