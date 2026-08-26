@@ -21,4 +21,5 @@ jmh {
     warmupIterations.set(3)
     iterations.set(5)
     fork.set(1)
+    profilers.set(listOf("stack"))
 }

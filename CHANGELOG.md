@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.1 - 2026-08-26
+
+### Corrigé
+
+- `put --tokenize` perdait un octet étendu (`0xFF <fn>`, plage non définie 0x80-0xFF) apparaissant
+  hors chaîne/REM/DATA. Préservé via `CpcCharset` comme le reste des octets de contrôle.
+
+### Performance
+
+- `BasicTokenizer` retokenise désormais ~4,5x plus vite : les mots-clés et fonctions sont regroupés
+  par première lettre (`matchLongestFirst`) au lieu d'un scan linéaire de toute la table à chaque
+  position. Mesuré via de nouveaux benchmarks JMH (sous-projet `benchmarks/`, `./gradlew :benchmarks:jmh`).
+
+### Ajouté
+
+- Configuration Geany (`editors/geany/filetypes.cpcbasic.conf`) pour la coloration syntaxique BASIC
+  des fichiers produits par `--spaced`.
+
 ## 1.0.0 - 2026-08-25
 
 Première version publique.

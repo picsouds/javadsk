@@ -252,7 +252,7 @@ Résultat sur un programme synthétique de 5000 lignes, temps moyen par appel (5
 | Opération                      | Temps moyen |
 |--------------------------------|-------------|
 | Détokenisation (bytes → texte) | 8,3 ms      |
-| Tokenisation (texte → bytes)   | 191,4 ms    |
+| Tokenisation (texte → bytes)   | 43,8 ms     |
 
 ## Limites connues
 

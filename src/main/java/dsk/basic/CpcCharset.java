@@ -69,6 +69,11 @@ final class CpcCharset {
     private static final int CONTROL_PICTURES_BASE = 0x2400;
     private static final int SYMBOL_FOR_DELETE = 0x2421;
 
+    /** {@code true} si {@code codepoint} est l'un des symboles produits par {@link #toUnicode} pour un octet de contrôle (0x00-0x1F/0x7F). */
+    static boolean isControlPicture(int codepoint) {
+        return (codepoint >= CONTROL_PICTURES_BASE && codepoint <= CONTROL_PICTURES_BASE + 0x1F) || codepoint == SYMBOL_FOR_DELETE;
+    }
+
     /** Octet CPC (0-255) -&gt; point de code Unicode à écrire dans le texte "--spaced". */
     static int toUnicode(int cpcByte) {
         if ((cpcByte & ~0xFF) != 0) { // couvre aussi les négatifs, pas juste > 255

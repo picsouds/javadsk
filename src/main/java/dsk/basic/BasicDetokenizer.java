@@ -309,6 +309,9 @@ public final class BasicDetokenizer {
                 case 0x0B:
                 case 0x0C:
                 case 0x0D:
+                    // 0x0D : seule valeur écrite par le tokeniseur texte->bytes (Tokenising.asm).
+                    // 0x0B : réécriture runtime de 0x0D en mémoire, jamais issue du texte source.
+                    // 0x0C : jamais observé
                     beforeSpecial("");
                     ts = out.length();
                     pos = appendVariableName(pos + 2);
@@ -376,7 +379,13 @@ public final class BasicDetokenizer {
                         kind = "fonction";
                     } else {
                         ts = out.length();
-                        out.append((char) (fn & 0x7F));
+                        // fn&0x7F est un octet de contrôle échappé (seul moyen de le stocker hors
+                        // chaîne/REM/DATA)
+                        if (spaced) {
+                            out.appendCodePoint(CpcCharset.toUnicode(fn & 0x7F));
+                        } else {
+                            out.append((char) (fn & 0x7F));
+                        }
                         kind = "caractère étendu";
                     }
                     lastSpecial = null;

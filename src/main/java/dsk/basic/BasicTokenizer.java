@@ -3,6 +3,7 @@ package dsk.basic;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -22,6 +23,9 @@ public final class BasicTokenizer {
     private static final Map<String, Integer> FUNCTION_TOKENS = new LinkedHashMap<>();
     private static final List<String> KEYWORDS_LONGEST_FIRST;
     private static final List<String> FUNCTIONS_LONGEST_FIRST;
+    // Groupé par 1re lettre : évite de scanner ~90 mots clés / ~64 fonctions (cf. benchmarks/).
+    private static final Map<Character, List<String>> KEYWORDS_BY_FIRST_CHAR;
+    private static final Map<Character, List<String>> FUNCTIONS_BY_FIRST_CHAR;
 
     // Opérateurs : jamais alphabétiques, donc traités à part de KEYWORDS_LONGEST_FIRST (cf. tryOperator).
     private static final String[] OPERATORS_LONGEST_FIRST = {
@@ -47,6 +51,17 @@ public final class BasicTokenizer {
         KEYWORDS_LONGEST_FIRST.sort((a, b) -> b.length() - a.length());
         FUNCTIONS_LONGEST_FIRST = new ArrayList<>(FUNCTION_TOKENS.keySet());
         FUNCTIONS_LONGEST_FIRST.sort((a, b) -> b.length() - a.length());
+        KEYWORDS_BY_FIRST_CHAR = groupByFirstChar(KEYWORDS_LONGEST_FIRST);
+        FUNCTIONS_BY_FIRST_CHAR = groupByFirstChar(FUNCTIONS_LONGEST_FIRST);
+    }
+
+    private static Map<Character, List<String>> groupByFirstChar(List<String> longestFirst) {
+        Map<Character, List<String>> byFirstChar = new HashMap<>();
+        for (String candidate : longestFirst) {
+            char first = Character.toUpperCase(candidate.charAt(0));
+            byFirstChar.computeIfAbsent(first, k -> new ArrayList<>()).add(candidate);
+        }
+        return byFirstChar;
     }
 
     private static final class Tokens {
@@ -244,8 +259,23 @@ public final class BasicTokenizer {
         /** Essaie chaque cas dans l'ordre, s'arrête au premier qui consomme du texte. */
         private boolean tryOneToken() {
             return tryStringContent() || tryRemComment() || tryDataLiteral() || tryStringStart()
-                    || tryColon() || tryComma() || tryPrintShorthand() || tryRsxCall() || tryNumber()
+                    || tryColon() || tryComma() || tryPrintShorthand() || tryRsxCall()
+                    || tryEscapedControlChar() || tryNumber()
                     || trySpace() || tryKeyword() || tryFunction() || tryVariable() || tryOperator();
+        }
+
+        // Octet de contrôle hors chaîne/REM/DATA : seul moyen de le stocker, l'échappement ROM
+        // "FF <0x80|octet>" (cf. BasicDetokenizer, cas 0xFF fn>=0x80).
+        private boolean tryEscapedControlChar() {
+            int cp = cursor.peekCodePoint();
+            if (!CpcCharset.isControlPicture(cp)) {
+                return false;
+            }
+            out.write(0xFF);
+            out.write(0x80 | CpcCharset.toCpcByte(cp));
+            cursor.advanceCodePoint();
+            s.expectLineRef = false;
+            return true;
         }
 
         private boolean tryStringContent() {
@@ -389,7 +419,7 @@ public final class BasicTokenizer {
             if (!isIdentifierStart(cursor.peek())) {
                 return false;
             }
-            String kw = matchLongestFirst(cursor, KEYWORDS_LONGEST_FIRST);
+            String kw = matchLongestFirst(cursor, KEYWORDS_BY_FIRST_CHAR);
             if (kw == null) {
                 return false;
             }
@@ -401,7 +431,7 @@ public final class BasicTokenizer {
             if (!isIdentifierStart(cursor.peek())) {
                 return false;
             }
-            String fn = matchLongestFirst(cursor, FUNCTIONS_LONGEST_FIRST);
+            String fn = matchLongestFirst(cursor, FUNCTIONS_BY_FIRST_CHAR);
             if (fn == null) {
                 return false;
             }
@@ -466,6 +496,7 @@ public final class BasicTokenizer {
             j = trimGluedElseSuffix(j);
             String name = cursor.substring(cursor.pos(), j);
             cursor.moveTo(j);
+            // Toujours 0x0D ici (Tokenising.asm)
             int typeToken = 0x0D;
             if (cursor.peek() == '$') {
                 typeToken = 0x03;
@@ -520,7 +551,11 @@ public final class BasicTokenizer {
         }
     }
 
-    private static String matchLongestFirst(Cursor cursor, List<String> candidates) {
+    private static String matchLongestFirst(Cursor cursor, Map<Character, List<String>> candidatesByFirstChar) {
+        List<String> candidates = candidatesByFirstChar.get(Character.toUpperCase(cursor.peek()));
+        if (candidates == null) {
+            return null;
+        }
         for (String candidate : candidates) {
             if (!cursor.regionMatchesIgnoreCase(candidate)) {
                 continue;
