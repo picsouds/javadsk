@@ -225,7 +225,7 @@ encodage corromprait les octets CPC non-ASCII).
 
 #### NB `--tokenize`
 
-Testé en round-trip (décodage → réencodage → comparaison) sur plusieurs milliers de fichiers Basic réels issus de [DSK TOSEC](https://www.tosecdev.org/).
+Testé (décodage → réencodage → comparaison) sur plusieurs milliers de fichiers Basic réels issus de [DSK TOSEC](https://www.tosecdev.org/).
 
 ## Architecture
 

@@ -1,7 +1,7 @@
 package dsk.basic;
 
 /**
- * Un événement du mode debug de {@link BasicDetokenizer#trace} : une décision de décodage
+ * Un événement du mode debug de {@link BasicDetokenizer#trace} : décodage
  * (position dans le fichier d'origine, octets bruts consommés, type, texte produit).
  */
 public final class BasicTraceEvent {

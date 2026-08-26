@@ -162,9 +162,7 @@ class DskToolTest {
 
     /**
      * Redirige System.out ET System.err vers le même buffer : Ascii/Basic écrivent directement sur
-     * System.out (pas via la PrintWriter picocli, cf. leurs commentaires), et fileNotFound() écrit
-     * sur getErr() (System.err par défaut) - un test qui n'en capture qu'un des deux passe à côté
-     * de la moitié des messages selon la commande.
+     * System.out (pas via la PrintWriter picocli), et fileNotFound() écrit sur getErr() (System.err par défaut)
      */
     private static Result run(String... args) {
         ByteArrayOutputStream captured = new ByteArrayOutputStream();

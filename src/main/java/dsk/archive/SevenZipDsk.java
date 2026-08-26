@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Extraction d'images .dsk / .edsk contenues dans une archive .7z (lecture pure Java via
- * Apache Commons Compress, sans dépendre du binaire 7z du système).
+ * Extraction d'images .dsk / .edsk contenues dans une archive .7z
  */
 public final class SevenZipDsk {
 

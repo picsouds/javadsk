@@ -9,9 +9,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Vérifie que {@link CpcCharset} est une vraie bijection sur les 256 octets CPC : chaque octet doit
- * round-tripper vers lui-même via toUnicode/toCpcByte, et surtout deux octets distincts ne doivent
- * jamais produire le même point de code Unicode (sinon la retokenisation ne peut plus les distinguer
- * - bug réel trouvé manuellement : l'octet 0xA0 collisionnait avec l'ASCII '^' 0x5E avant correction).
+ * être préservé lors de la conversion inverse via toUnicode/toCpcByte, et surtout deux octets distincts
+ * ne doivent jamais produire le même Unicode (sinon la retokenisation ne peut plus les distinguer)
  */
 class CpcCharsetTest {
 
@@ -19,7 +18,7 @@ class CpcCharsetTest {
     void everyByteRoundTripsThroughUnicodeAndBackToItself() {
         for (int b = 0; b <= 0xFF; b++) {
             int cp = CpcCharset.toUnicode(b);
-            assertEquals(b, CpcCharset.toCpcByte(cp), "octet " + Integer.toHexString(b) + " ne round-trip pas");
+            assertEquals(b, CpcCharset.toCpcByte(cp), "octet " + Integer.toHexString(b) + " n'est pas restitué à l'identique");
         }
     }
 

@@ -211,8 +211,7 @@ public class DiskImage {
 
     /**
      * Inverse de {@link #parse}. Recalcule la table des tailles de piste depuis les données
-     * actuelles plutôt que de la conserver telle que lue : un round-trip sans modification produit
-     * un fichier équivalent, pas forcément identique octet à octet.
+     * actuelles plutôt que de la conserver telle que lue.
      */
     public void write(OutputStream rawOut) throws IOException {
         DataOutputStream out = new DataOutputStream(rawOut);

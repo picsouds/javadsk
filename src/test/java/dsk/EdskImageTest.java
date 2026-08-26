@@ -17,7 +17,7 @@ class EdskImageTest {
     @Test
     void usesDeclaredSectorLengthRatherThanSizeCode() throws IOException {
         // sizeCode=6 induirait 0x80<<6=8192 octets ; l'EDSK déclare explicitement une longueur
-        // différente (secteur "petit" avec un gros sizeCode, vu sur des disquettes protégées réelles).
+        // différente
         byte[] payload = "HELLO EDSK".getBytes(StandardCharsets.US_ASCII);
         byte[] raw = new EdskImageBuilder()
                 .track(0, 0, 0xC1, 6, 100, payload)

@@ -27,7 +27,7 @@ final class ArchiveUtil {
         return out.toByteArray();
     }
 
-    /** @throws IOException si 0 ou plusieurs images (le message liste alors les entrées, pour --entry). */
+    /** @throws IOException si 0 ou plusieurs images (le message liste alors les entrées du fichier). */
     static byte[] extractSingle(Path archive, List<String> candidates, EntryExtractor extractor) throws IOException {
         if (candidates.isEmpty()) {
             throw new IOException("Aucune image .dsk/.edsk trouvée dans l'archive : " + archive);

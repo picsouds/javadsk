@@ -53,9 +53,7 @@ class AmsdosHeaderTest {
         AmsdosHeader header = AmsdosHeader.parse(shortBuf);
 
         // buffer tout à zéro une fois complété -> checksum stocké et calculé valent tous deux 0,
-        // mais isValid() doit rester faux (pas de vrai header sur un fichier aussi court) : bug réel
-        // trouvé sur un vrai disque (entrée catalogue 0 octet) - le "0 == 0" coïncidait avec un
-        // header valide et payloadOf plantait ensuite sur l'arraycopy (source trop courte).
+        // mais isValid() doit rester faux (pas de vrai header sur un fichier aussi court).
         assertEquals(0, header.checksum);
         assertEquals(0, header.computedChecksum);
         assertFalse(header.isValid());

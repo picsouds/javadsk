@@ -83,10 +83,9 @@ public final class BasicDetokenizer {
     }
 
     /**
-     * Comme {@link #listing}, mais espacée comme un vrai {@code SAVE"nom",A} : source pour
-     * {@code put --tokenize} (sans ces espaces le retokeniseur ne peut pas délimiter les mots-clés
-     * collés). Ne sanitize pas en '?' comme {@link #listing} : un octet personnalisé (accent via
-     * {@code SYMBOL}) doit survivre tel quel pour ne pas être perdu au retokenize.
+     * Comme {@link #listing}, mais espacée comme un vrai {@code SAVE"nom",A} - source de {@code put
+     * --tokenize}. Ne sanitize pas en '?' : un octet personnalisé (accent via {@code SYMBOL}) doit
+     * survivre tel quel pour ne pas se perdre au retokenize.
      */
     public static String spacedListing(byte[] buf) {
         Run run = new Run(buf, false, true);
@@ -99,9 +98,7 @@ public final class BasicDetokenizer {
         return trace(buf, false);
     }
 
-    /** Comme {@link #trace(byte[])}, mais {@code spaced=true} passe le texte de chaque événement par
-     * {@link CpcCharset} (comme {@link #spacedListing}) au lieu du sanitize() façon iDSK - pratique
-     * pour relire la table CpcCharset directement sur un vrai fichier via {@code basic --debug --spaced}. */
+    /** Comme {@link #trace(byte[])}, mais {@code spaced=true} rend le texte via {@link CpcCharset} au lieu du sanitize() façon iDSK. */
     public static List<BasicTraceEvent> trace(byte[] buf, boolean spaced) {
         Run run = new Run(buf, true, spaced);
         run.execute();
@@ -185,9 +182,8 @@ public final class BasicDetokenizer {
                 lastSpecial = null; // le numéro de ligne inclut déjà son propre espace final
 
                 boolean inString = false;
-                // Sans ça, un '|' (RSX) littéral dans un REM se lit comme un vrai appel RSX et peut
-                // dévorer les lignes suivantes (bug réel, iDSK a le même défaut). Seule
-                // spacedListing() le corrige, listing()/trace() gardent la parité iDSK.
+                // Un '|' (RSX) littéral dans un REM se lit comme un vrai appel RSX et peut dévorer les
+                // lignes suivantes (bug réel, partagé avec iDSK) ==> spacedListing() le corrige.
                 boolean inRemComment = false;
                 // Même défaut pour DATA/DEFINT/DEFREAL/DEFSTR, littéral jusqu'au premier ':' réel.
                 boolean inDataLiteral = false;
@@ -198,9 +194,7 @@ public final class BasicDetokenizer {
                     token = byteAt(pos++);
                     //noinspection StatementWithEmptyBody
                     if (token == 0) {
-                        // Fin de ligne : jamais du contenu, même si une chaîne est restée ouverte
-                        // (ex: RUN "prog.bas sans guillemet fermant) - sinon le round-trip réinjecte
-                        // un faux 0x00 et désynchronise la lecture des lignes suivantes.
+                        // Fin de ligne : jamais du contenu, même chaîne restée ouverte (ex: RUN "prog.bas sans guillemet fermant).
                     } else if (spaced && inRemComment) {
                         appendLiteral(tokenStart, (char) token);
                     } else if (spaced && inDataLiteral && (token != 0x01 || dataLiteralInString)) {
@@ -270,8 +264,8 @@ public final class BasicDetokenizer {
                 literalTextStart = out.length();
             }
             if (spaced) {
-                // Représentation Unicode éditable de l'octet CPC plutôt que l'octet brut - seulement
-                // en mode spaced (source de put --tokenize) ; listing() garde sanitize()/'?' pour iDSK.
+                // Représentation Unicode éditable au lieu de l'octet brut - seulement en mode spaced
+                // (source de put --tokenize) ; listing() garde sanitize()/'?' pour iDSK.
                 out.appendCodePoint(CpcCharset.toUnicode(c));
             } else {
                 out.append(c);
@@ -290,13 +284,8 @@ public final class BasicDetokenizer {
         }
 
         /**
-         * Décode les octets de token qui ne sont ni un mot-clé (0x80-0xFE) ni du texte littéral -
-         * repères pour s'y retrouver dans les {@code case} ci-dessous (référence :
-         * <a href="https://cpctech.cpcwiki.de/docs/bastech.html">bastech.html</a>) :
-         * 0x01 ':' | 0x02-0x04 variable typée (%/$/!) | 0x0B-0x0D variable simple |
-         * 0x19 constante 8 bits | 0x1A/0x1E constante 16 bits (normale/référence de ligne) |
-         * 0x1B constante binaire (&X) | 0x1C constante hexa (&) | 0x1F constante flottante (5 octets) |
-         * 0x7C appel RSX (|) | 0xFF fonction (si octet suivant &lt;0x80) ou caractère étendu (sinon).
+         * Décode les octets de token qui ne sont ni un mot-clé (0x80-0xFE) ni du texte littéral - cf.
+         * <a href="https://cpctech.cpcwiki.de/docs/bastech.html">bastech.html</a> pour la table complète.
          */
         private void appendSpecialToken(int tokenStart, int token) {
             int ts;
@@ -346,8 +335,7 @@ public final class BasicDetokenizer {
                 case 0x1B:
                     beforeSpecial("");
                     ts = out.length();
-                    // iDSK affiche "&X" en hexa par erreur (gardé pour la parité) ; spacedListing()
-                    // encode en vrai binaire, sinon le retokenizer (0/1 seulement) plantait.
+                    // iDSK affiche "&X" en hexa par erreur (gardé pour la parité) ; spacedListing() encode en vrai binaire.
                     int value = word(pos);
                     out.append("&X").append(spaced ? Integer.toBinaryString(value) : hex(value));
                     pos = pos + 2;
@@ -371,8 +359,7 @@ public final class BasicDetokenizer {
                     lastSpecial = "";
                     return;
                 case 0x7C:
-                    // Un appel RSX ('|') n'est jamais précédé d'un espace, même après un mot-clé
-                    // "mot" qui en voudrait normalement un (vérifié sur du CPC réel : "THEN|PR").
+                    // '|' RSX n'est jamais précédé d'un espace, même après un mot-clé qui en voudrait un (vérifié sur CPC réel : "THEN|PR").
                     ts = out.length();
                     out.append('|');
                     pos = appendVariableName(pos + 1);

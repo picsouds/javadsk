@@ -66,10 +66,6 @@ class CatalogWriterTest {
 
     @Test
     void explicitTypeOverrideOnExistingFileStillKeepsOriginalLoadAndExecAddresses() throws IOException {
-        // Reproduit un bug réel : forcer --type (ex: après --tokenize, pour reconstruire le header
-        // suite à une retokenisation) sans préciser --load/--exec ne doit PAS remettre load/exec à
-        // 0 quand le fichier remplacé avait déjà un header valide - ils doivent rester ceux
-        // d'origine, exactement comme quand --type n'est pas précisé du tout.
         byte[] originalPayload = "10 PRINT 1".getBytes(StandardCharsets.US_ASCII);
         byte[] header = AmsdosHeaderBuilder.build("PROG", "BAS", AmsdosHeader.TYPE_BASIC,
                 0x0170, 0x0000, originalPayload.length);
@@ -172,8 +168,7 @@ class CatalogWriterTest {
     @Test
     void createsMultiExtentFileForContentLargerThanOneCpmExtent() throws IOException {
         // Un extent CP/M plafonne à 128 records (16384 octets) : au-delà, putFile doit créer une
-        // 2e entrée de catalogue (extentLow=1). Jamais exercé par aucun autre test/fichier réel
-        // rencontré jusqu'ici (linter : "extentLow est toujours 0") - vérifié explicitement ici.
+        // 2e entrée de catalogue (extentLow=1)
         DiskImage disk = DiskImage.formatted("test", 40, 512, 9, 0xC1);
         byte[] content = new byte[20000];
         new java.util.Random(42).nextBytes(content);

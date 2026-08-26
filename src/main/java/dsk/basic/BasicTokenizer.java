@@ -85,11 +85,9 @@ public final class BasicTokenizer {
         return token == Tokens.DATA || token == Tokens.DEFINT || token == Tokens.DEFSTR || token == Tokens.DEFREAL;
     }
 
-    // Table ROM réelle "keywords_taking_line_numbers" (Tokenising.asm) : le nombre qui suit un de
-    // ces mots-clés est encodé 0x1E (référence de ligne) et non 0x19/0x1A (constante ordinaire) -
-    // seul le premier nombre après le mot-clé compte, cf. tryNumber() qui réarme expectLineRef à
-    // false dès qu'un nombre est consommé (sauf ON GOTO/GOSUB, seul cas réel où une liste de
-    // plusieurs cibles séparées par des virgules doit toutes rester des références de ligne).
+    // Table ROM "keywords_taking_line_numbers" (Tokenising.asm) : le nombre qui suit encode une
+    // référence de ligne (0x1E) et non une constante (0x19/0x1A) - sauf ON GOTO/GOSUB, seul cas où
+    // plusieurs cibles séparées par des virgules restent toutes des références de ligne.
     private static boolean impliesLineReferenceArgument(int token) {
         return token == Tokens.GOTO || token == Tokens.GOSUB || token == Tokens.RESTORE
                 || token == Tokens.LIST || token == Tokens.RUN || token == Tokens.AUTO
@@ -359,9 +357,8 @@ public final class BasicTokenizer {
 
         private boolean tryNumber() {
             char c = cursor.peek();
-            // Un flottant peut commencer directement par le point (".5" = 0.5, syntaxe CPC valide) -
-            // real ROM traite '.' et chiffre de façon identique en entrée de nombre (Tokenising.asm,
-            // tokenise_item : test_if_period_or_digit teste les deux ensemble).
+            // Un flottant peut commencer directement par le point (".5" = 0.5, syntaxe CPC valide)
+            // la ROM traite '.' et chiffre de façon identique en entrée de nombre (Tokenising.asm).
             boolean leadingDot = c == '.' && Character.isDigit(cursor.peek(1));
             if (!(Character.isDigit(c) || leadingDot || (c == '&' && isHexOrBinStart(cursor.peek(1))))) {
                 return false;
@@ -431,9 +428,7 @@ public final class BasicTokenizer {
         /** @param token déjà résolu ; le curseur doit déjà être avancé au-delà du texte source consommé. */
         private void writeKeywordToken(int token) {
             if (token == Tokens.ELSE && out.size() > 0) {
-                // spacedListing efface toujours exactement un ':' devant ELSE : un ':' visible veut
-                // donc dire 2 octets 0x01 à l'origine, jamais 1 - on réécrit celui "en trop" sans
-                // condition, sinon le round-trip perd le séparateur.
+                // spacedListing efface un ':' devant ELSE : un ':' visible ici veut dire 2 octets 0x01 à l'origine.
                 out.write(0x01);
             }
             out.write(token);
@@ -455,10 +450,7 @@ public final class BasicTokenizer {
             s.lastWasOn = (token == Tokens.ON);
         }
 
-        // Real ROM : '?' est un synonyme direct de PRINT, converti au token PRINT dès la
-        // tokenisation (Tokenising.asm, tokenise_any_other_ascii_char : xor $3f / ld b,$bf). Invisible
-        // au décodage (LIST affiche toujours "PRINT", jamais "?"), donc jamais vu en round-trip sur
-        // un vrai disque - seulement pertinent pour du texte tapé/édité à la main utilisant ce raccourci.
+        // '?' est un synonyme de PRINT, converti au token PRINT dès la tokenisation (Tokenising.asm)
         private boolean tryPrintShorthand() {
             if (cursor.peek() != '?') {
                 return false;

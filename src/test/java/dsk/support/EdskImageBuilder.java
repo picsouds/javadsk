@@ -28,7 +28,7 @@ public final class EdskImageBuilder {
 
     /**
      * Ajoute une piste avec un seul secteur dont la longueur déclarée peut différer de celle
-     * induite par sizeCode (comme observé sur des disquettes réelles, ex. Discology).
+     * induite par sizeCode.
      */
     public EdskImageBuilder track(int trackNumber, int side, int sectorId, int sizeCode,
                                    int declaredLength, byte[] data) {

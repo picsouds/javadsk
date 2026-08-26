@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Extraction d'images .dsk / .edsk contenues dans une archive .zip (lecture pure Java via
- * Apache Commons Compress).
+ * Extraction d'images .dsk / .edsk contenues dans une archive .zip
  */
 public final class ZipDsk {
 
@@ -23,7 +22,6 @@ public final class ZipDsk {
         return path.toString().toLowerCase(Locale.ROOT).endsWith(".zip");
     }
 
-    /** Liste les entrées de l'archive dont le nom se termine par .dsk ou .edsk. */
     public static List<String> listDskEntries(Path archive) throws IOException {
         List<String> names = new ArrayList<>();
         try (ZipFile zipFile = ZipFile.builder().setFile(archive.toFile()).get()) {

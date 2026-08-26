@@ -100,8 +100,7 @@ class BasicDetokenizerTest {
         };
         appendLine(buf, 10, line10);
 
-        // 20 yELSEZ : ':' avalé devant ELSE avec une VARIABLE avant -> pas d'espace (exception
-        // vérifiée sur le fichier réel, contrairement au cas "nombre avant" ci-dessus).
+        // 20 yELSEZ : ':' avalé devant ELSE avec une VARIABLE avant ==> pas d'espace
         byte[] line20 = {
             0x0D, 0x00, 0x00, (byte) 0xF9,               // variable "y"
             0x01,                                        // :
@@ -120,15 +119,6 @@ class BasicDetokenizerTest {
 
     @Test
     void spacedListingMapsCustomCharacterBytesToUnicodeButListingSanitizesThemLikeIdsk() {
-        // Bug réel trouvé sur du vrai matériel : un jeu commercial redéfinit CHR$(128)/CHR$(129) via
-        // SYMBOL pour des lettres accentuées sans équivalent ASCII fixe, stockées telles quelles dans
-        // une chaîne DATA. listing() (parité iDSK, cf. feedback-match-idsk-reference-output) doit
-        // continuer à les remplacer par '?'. spacedListing() - qui sert de source à
-        // 'put --tokenize' - les représente via le jeu de caractères Amstrad CPC officiel
-        // (CpcCharset, cf. https://en.wikipedia.org/wiki/Amstrad_CPC_character_set), lisible dans un
-        // éditeur de texte normal plutôt que des octets de contrôle Latin-1 invisibles, tout en
-        // restant bijectif pour un aller-retour exact via BasicTokenizer (indépendamment du glyphe
-        // réellement affiché à l'écran, que SYMBOL peut redéfinir - hors de portée ici).
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         byte[] line10 = {
             (byte) '"', (byte) 0x81, (byte) 0x80, (byte) '"',
@@ -152,8 +142,6 @@ class BasicDetokenizerTest {
     @Test
     void spacedListingMapsBlockGraphicsCodeToSupplementaryPlaneCodepoint() {
         // Les codes 0xC0-0xDF correspondent au bloc Unicode "Symbols for Legacy Computing"
-        // (U+1FBxx), hors du plan de base : nécessite une paire de substituts en Java. Vérifie que
-        // ça ne casse rien (StringBuilder#appendCodePoint gère ça correctement).
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         byte[] line10 = {
             (byte) '"', (byte) 0xC0, (byte) '"',
@@ -170,14 +158,6 @@ class BasicDetokenizerTest {
 
     @Test
     void unterminatedStringRunningToEndOfLineDoesNotRenderTheLineTerminatorAsContent() {
-        // Bug réel trouvé sur du vrai fichier (RIVERM.COD, un jeu commercial) : une chaîne jamais
-        // refermée qui court jusqu'à la fin de la ligne (ex: RUN "prog.bas, sans guillemet final)
-        // faisait apparaître le "?" de sanitize() pour l'octet 0x00 de fin de ligne, comme s'il
-        // faisait partie du texte de la chaîne. Une fois ce "?" retokenisé via --tokenize, il
-        // réinjecte un vrai octet 0x00 EN PLUS du vrai terminateur de ligne - deux 0x00 consécutifs
-        // désynchronisent la lecture de TOUTES les lignes suivantes (numéros de ligne et contenu
-        // complètement corrompus). Le 0x00 de fin de ligne ne doit jamais être traité comme du texte,
-        // même quand une chaîne est restée ouverte.
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         byte[] line10 = {
             (byte) '"', (byte) 'x', 0x00, // chaîne ouverte par '"', jamais refermée

@@ -41,9 +41,6 @@ public class BasicCommand extends AbstractTargetFileCommand {
         byte[] payload = AmsdosHeader.payloadOf(raw);
 
         // UTF-8 direct sur stdout, pas la PrintWriter de picocli (charset JVM non garanti) :
-        // spacedListing()/trace(..., true) peuvent contenir des points de code >0xFF (cf.
-        // CpcCharset) qu'un charset limité à 0-255 remplacerait silencieusement par '?'.
-        // PutCommand relit en UTF-8 symétriquement.
         StringBuilder output = new StringBuilder();
         if (debug) {
             for (BasicTraceEvent event : BasicDetokenizer.trace(payload, spaced)) {

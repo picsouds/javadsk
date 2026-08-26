@@ -6,7 +6,6 @@ import java.util.Map;
 /**
  * Correspondance bijective octet CPC 0x80-0xFF &lt;-&gt; Unicode (table
  * <a href="https://en.wikipedia.org/wiki/Amstrad_CPC_character_set">...</a>), pour un texte "--spaced" lisible.
- * Représente l'OCTET, pas forcément le glyphe réel : {@code SYMBOL} peut le redéfinir à l'écran.
  */
 final class CpcCharset {
 
@@ -14,7 +13,7 @@ final class CpcCharset {
     }
 
     // Index = octet CPC - 0x80. 0xEF/0xFC/0xFD n'ont de point Unicode que depuis 16.0 ("Symbols for
-    // Legacy Computing Supplement"), absents de la version 13.0 utilisée pour le reste de la table.
+    // Legacy Computing Supplement")
     private static final int[] CPC_TO_UNICODE = {
         // 0x80-0x8F
         0x00A0, 0x2598, 0x259D, 0x2580, 0x2596, 0x258C, 0x259E, 0x259B,
@@ -56,7 +55,7 @@ final class CpcCharset {
         }
     }
 
-    // Vrai à tous les coups aujourd'hui (tableau littéral de taille fixe) : garde-fou si modif CPC_TO_UNICODE
+    // garde-fou si modif CPC_TO_UNICODE
     @SuppressWarnings("ConstantConditions")
     private static void checkTableLength() {
         if (CPC_TO_UNICODE.length != 128) {
@@ -64,8 +63,9 @@ final class CpcCharset {
         }
     }
 
-    // 0x00-0x1F/0x7F aussi mappés : un code VDU brut (ex : CHR$(1) dans une chaîne PRINT) écrit tel
-    // quel casserait le découpage sur \r\n de BasicTokenizer#tokenizeProgram si c'était 0x0D/0x0A.
+    // 0x00-0x1F/0x7F remappés vers un bloc Unicode dédié, jamais recopiés tels quels : un octet CPC
+    // 0x0D/0x0A littéral (ex: CHR$(13) dans une chaîne) serait sinon indiscernable d'un vrai retour à
+    // la ligne et casserait le split \r\n de BasicTokenizer#tokenizeProgram au retokenize.
     private static final int CONTROL_PICTURES_BASE = 0x2400;
     private static final int SYMBOL_FOR_DELETE = 0x2421;
 
@@ -102,8 +102,7 @@ final class CpcCharset {
             return b;
         }
         if (codepoint <= 0xFF) {
-            // Caractère Latin-1 non utilisé par la table CPC : conservé tel quel pour préserver
-            // un éventuel octet brut plutôt que de rejeter.
+            // Caractère Latin-1 non utilisé par la table CPC
             return codepoint;
         }
         throw new IllegalArgumentException(

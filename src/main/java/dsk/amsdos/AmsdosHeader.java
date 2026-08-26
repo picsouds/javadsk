@@ -168,9 +168,7 @@ public class AmsdosHeader {
     }
 
     /**
-     * Construit un header AMSDOS valide (128 octets, checksum inclus) pour {@code logicalLength}
-     * octets de charge utile, inverse de {@link #parse}/{@link #isValid()} : {@code
-     * parse(buildBytes(...)).isValid()} est toujours vrai.
+     * Construit un header AMSDOS valide (128 octets, checksum inclus) pour {@code logicalLength} octets
      */
     public static byte[] buildBytes(int userNumber, String filename, String extension, int fileType,
                                      int loadAddress, int logicalLength, int entryAddress) {
