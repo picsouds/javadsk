@@ -37,16 +37,6 @@ Projet Gradle. Nécessite un JDK 21+ pour compiler (Gradle/JUnit 6) ; le jar pro
 Le jar exécutable est généré dans `build/libs/javadsk-x.x.x.jar` (`x.x.x` = la version courante,
 définie dans `build.gradle.kts`).
 
-> [!NOTE]
-> **Sous Windows (PowerShell)**, les caractères accentués peuvent mal s'afficher (`tokenis├®` au
-> lieu de `tokenisé`) : la sortie est en UTF-8, mais la console attend souvent un autre encodage.
-> 
-> Le correctif :
-> ```powershell
-> [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-> ```
-> à exécuter une fois par session PowerShell avant de lancer `java -jar ...`.
-
 ## Utilisation
 
 ```
@@ -54,6 +44,17 @@ java -jar build/libs/javadsk-x.x.x.jar --help
 java -jar build/libs/javadsk-x.x.x.jar --version
 java -jar build/libs/javadsk-x.x.x.jar extract --help    # aide d'une sous-commande
 ```
+
+> [!NOTE]
+> **Sous Windows (PowerShell)**, les caractères accentués peuvent mal s'afficher (`tokenis├®` au
+> lieu de `tokenisé`) : la sortie est en UTF-8, mais la console attend souvent un autre encodage.
+>
+> Le correctif :
+> ```powershell
+> [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+> ```
+> à exécuter une fois par session PowerShell avant de lancer `java -jar ...`.
+
 
 ### Lire une image
 
@@ -164,12 +165,26 @@ java -jar build/libs/javadsk-x.x.x.jar put image.dsk prog.txt PROG.BAS --out sor
 Si le fichier remplacé a déjà un header AMSDOS valide et qu'aucun `--type` n'est donné, celui-ci
 est reconstruit automatiquement (nouvelle taille, checksum recalculé).
 
+### Supprimer un fichier
+
 ```
-java -jar build/libs/javadsk-x.x.x.jar remove image.dsk PROG.BAS --out sortie.dsk   # marque supprimé (0xE5)
-java -jar build/libs/javadsk-x.x.x.jar new vierge.dsk                               # 40 pistes, format data
+java -jar build/libs/javadsk-x.x.x.jar remove image.dsk PROG.BAS --out sortie.dsk        # format data
+java -jar build/libs/javadsk-x.x.x.jar remove image.dsk PROG.BAS system --out sortie.dsk # format CP/M non standard
+```
+
+Comme `iDSK -r` : le fichier n'est pas effacé, seule son entrée de catalogue est marquée
+supprimée (octet user `0xE5`).
+
+### Créer une image vierge
+
+```
+java -jar build/libs/javadsk-x.x.x.jar new vierge.dsk                       # 40 pistes, format data
 java -jar build/libs/javadsk-x.x.x.jar new vierge.dsk system --tracks 42
 ```
 
+Comme `iDSK -n`. Le format (2e argument, `data`/`system`/`ibm`) et `--tracks` (40 par défaut,
+standard disquette CPC simple face) sont les seuls réglages ; le nombre de faces et la taille de
+secteur suivent le format choisi.
 
 ### Éditer un programme BASIC
 
