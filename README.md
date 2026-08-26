@@ -239,6 +239,21 @@ Testé (décodage → réencodage → comparaison) sur plusieurs milliers de fic
 | `dsk.hex`     | dump hexadécimal                                        |
 | `dsk.cli`     | interface en ligne de commande                          |
 
+## Performance
+
+Benchmarks JMH dans le sous-projet `benchmarks/`
+
+```
+./gradlew :benchmarks:jmh
+```
+
+Résultat sur un programme synthétique de 5000 lignes, temps moyen par appel (5 mesures) :
+
+| Opération                      | Temps moyen |
+|--------------------------------|-------------|
+| Détokenisation (bytes → texte) | 8,3 ms      |
+| Tokenisation (texte → bytes)   | 191,4 ms    |
+
 ## Limites connues
 
 - Simple face uniquement (la double-face n'est gérée qu'en filtrant la face 0).
