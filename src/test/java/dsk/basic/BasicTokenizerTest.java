@@ -200,6 +200,30 @@ class BasicTokenizerTest {
     }
 
     @Test
+    void undefinedExtendedCharacterOutsideAnyLiteralRoundTripsThroughSpacedListing() {
+        byte[] original = getUndefinedExtendedCharProgram();
+        String spaced = BasicDetokenizer.spacedListing(original);
+        byte[] roundTripped = BasicTokenizer.tokenizeProgram(spaced);
+        assertEquals(hex(original), hex(roundTripped));
+    }
+
+    private static byte[] getUndefinedExtendedCharProgram() {
+        byte[] content = {
+            0x0D, 0x00, 0x00, (byte) 0xC1,     // variable "A"
+            (byte) 0xFF, (byte) 0xFF,          // caractère étendu non défini (préfixe FF, fn=FF)
+            0x13,                               // nombre "5" (forme compacte)
+            0x00,                               // fin de ligne
+        };
+        int lineLength = 4 + content.length;
+        return new byte[]{
+            (byte) (lineLength & 0xFF), (byte) (lineLength >> 8),  // longueur de ligne
+            0x0A, 0x00,                                             // numéro de ligne 10
+            content[0], content[1], content[2], content[3], content[4], content[5], content[6], content[7],
+            0x00, 0x00,                                             // fin de programme
+        };
+    }
+
+    @Test
     void autoRenumDeleteEditGetLineReferenceTokenForTheirFirstArgument() {
         // Table ROM réelle keywords_taking_line_numbers (Tokenising.asm) : le nombre juste après
         // AUTO/RENUM/DELETE/EDIT est une référence de ligne (0x1E), pas une constante ordinaire
