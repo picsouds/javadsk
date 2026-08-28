@@ -1,6 +1,7 @@
 package dsk.cli;
 
 import dsk.DiskImage;
+import dsk.archive.DskLoader;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 

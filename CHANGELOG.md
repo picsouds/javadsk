@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.2 - 2026-08-27
+
+### Ajouté
+
+- Interface graphique (sous-projet `gui/`, Swing + [FlatLaf](https://github.com/JFormDesigner/FlatLaf)) utilisant  directement les classes `dsk.*` (mêmes résultats, octet pour octet, que la CLI).
+- Le jar GUI (`gui-x.x.x.jar`) est désormais publié en plus du jar CLI (`javadsk-x.x.x.jar`) sur
+  chaque release GitHub.
+
+### Modifié
+
+- `DskLoader` (résolution image directe/archive) déplacé de `dsk.cli` (interne) vers `dsk.archive`
+  (public), pour être partagé entre la CLI et le GUI.
+
 ## 1.0.1 - 2026-08-26
 
 ### Corrigé

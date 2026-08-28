@@ -1,22 +1,20 @@
-package dsk.cli;
+package dsk.archive;
 
 import dsk.DiskImage;
-import dsk.archive.SevenZipDsk;
-import dsk.archive.ZipDsk;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 /**
- * Résout un chemin passé en ligne de commande (image .dsk/.edsk directe, ou archive .7z/.zip la
- * contenant) en {@link DiskImage}.
+ * Résout un chemin (image .dsk/.edsk directe, ou archive .7z/.zip la contenant) en {@link DiskImage}.
+ * Partagé par la CLI (dsk.cli.AbstractReadCommand) et le GUI (dsk.gui.model.DiskSession).
  */
-final class DskLoader {
+public final class DskLoader {
 
     private DskLoader() {
     }
 
-    static DiskImage load(Path path, String entry) throws IOException {
+    public static DiskImage load(Path path, String entry) throws IOException {
         if (SevenZipDsk.isSevenZip(path)) {
             byte[] raw = (entry != null) ? SevenZipDsk.extract(path, entry) : SevenZipDsk.extractSingle(path);
             return DiskImage.parse(raw);

@@ -54,11 +54,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build sonar --info
 
-      - name: Artifact JAR for release
+      - name: Artifacts (CLI + GUI jars) for release
         uses: actions/upload-artifact@v4
         with:
-          name: javadsk-jar
-          path: build/libs/
+          name: javadsk-jars
+          path: |
+            build/libs/*.jar
+            gui/build/libs/*.jar
 
   release:
     name: Create GitHub Release
@@ -71,11 +73,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download jar artifact from build for release
+      - name: Download jars artifact from build for release
         uses: actions/download-artifact@v4
         with:
-          name: javadsk-jar
-          path: build/libs
+          name: javadsk-jars
+          path: artifacts
 
       - name: Verify build.gradle.kts version matches tag
         run: |
@@ -100,18 +102,22 @@ jobs:
           echo "$CHANGELOG" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: Find JAR file
-        id: find_jar
+      - name: Find CLI and GUI jars
+        id: find_jars
         run: |
-          JAR_FILE=$(ls build/libs/*.jar | head -n 1)
-          if [ -z "$JAR_FILE" ]; then
-            echo "Error: No JAR file found in build/libs/"
+          # Nommés explicitement d'après le tag (pas un "head -n 1" sur un glob) : évite de publier
+          # un jar d'une autre version si l'un ou l'autre build/libs en contient plusieurs.
+          TAG=${GITHUB_REF_NAME}
+          CLI_JAR="artifacts/build/libs/javadsk-${TAG}.jar"
+          GUI_JAR="artifacts/gui/build/libs/gui-${TAG}.jar"
+          if [ ! -f "$CLI_JAR" ] || [ ! -f "$GUI_JAR" ]; then
+            echo "Error: expected both CLI and GUI jars for tag ${TAG}, got CLI='$CLI_JAR' (exists: $(test -f "$CLI_JAR" && echo yes || echo no)) GUI='$GUI_JAR' (exists: $(test -f "$GUI_JAR" && echo yes || echo no))"
             exit 1
           fi
-          echo "jar_path=$JAR_FILE" >> $GITHUB_OUTPUT
-          echo "jar_name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
+          echo "cli_jar=$CLI_JAR" >> $GITHUB_OUTPUT
+          echo "gui_jar=$GUI_JAR" >> $GITHUB_OUTPUT
 
-      - name: Create Release and upload JAR
+      - name: Create Release and upload jars
         # softprops/action-gh-release@v3.0.2 , see https://github.com/softprops/action-gh-release/releases/tag/v3.0.2
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228
         with:
@@ -120,4 +126,6 @@ jobs:
           body: ${{ env.CHANGELOG }}
           draft: false
           prerelease: false
-          files: ${{ steps.find_jar.outputs.jar_path }}
+          files: |
+            ${{ steps.find_jars.outputs.cli_jar }}
+            ${{ steps.find_jars.outputs.gui_jar }}

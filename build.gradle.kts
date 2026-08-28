@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "dsk"
-version = "1.0.1"
+version = "1.0.2"
 
 java {
     toolchain {
@@ -72,5 +72,13 @@ sonar {
         property("sonar.java.binaries", "build/classes/java/main")
         property("sonar.sources", "src/main/java")
         property("sonar.tests", "src/test/java")
+        // Vue Swing, contrôleur et point d'entrée (MainWindow) : orchestration de fenêtres/dialogues,
+        // non testable sans écran (Frame/JOptionPane lèvent HeadlessException en CI). La logique
+        // testable est dans model/service, qui restent couverts normalement.
+        property("sonar.coverage.exclusions", listOf(
+            "gui/src/main/java/dsk/gui/*.java",
+            "gui/src/main/java/dsk/gui/view/**",
+            "gui/src/main/java/dsk/gui/controller/**"
+        ).joinToString(","))
     }
 }

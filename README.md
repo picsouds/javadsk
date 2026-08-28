@@ -5,11 +5,11 @@
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=picsouds_javadsk&metric=bugs)](https://sonarcloud.io/summary/new_code?id=picsouds_javadsk)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=picsouds_javadsk&metric=coverage)](https://sonarcloud.io/summary/new_code?id=picsouds_javadsk)
 
-javadsk est une bibliothèque Java et un outil en ligne de commande pour manipuler des images de
+javadsk est une bibliothèque Java et un outil en ligne de commande/GUI pour manipuler des images de
 disquette Amstrad CPC (`.dsk` / `.edsk`).
 
 Inspiré du projet Go [jeromelesaux/dsk](https://github.com/jeromelesaux/dsk) (lecture/écriture des
-images) et de [iDSK](https://github.com/cpcsdk/iDSK).
+images) et du projet [iDSK](https://github.com/cpcsdk/iDSK).
 
 Le projet permet de :
 
@@ -26,18 +26,22 @@ Le projet permet de :
 
 ## Compilation
 
-Projet Gradle. Nécessite un JDK 21+ pour compiler (Gradle/JUnit 6) ; le jar produit cible Java 11
-(`compileJava.options.release`), donc exécutable sur un JRE 11 ou plus récent.
+Projet Gradle multi-module (racine = CLI, `gui/` = interface graphique, `benchmarks/` = JMH).
+Nécessite un JDK 21+ pour compiler (Gradle/JUnit 6) ; les jars produits sont Java 11
+(`compileJava.options.release`), donc exécutables sur un JRE 11 ou plus récent.
 
 ```
-./gradlew build      # compile + exécute les tests
+./gradlew build      # compile + exécute les tests de tous les sous-projets
 ./gradlew test       # tests uniquement
 ```
 
-Le jar exécutable est généré dans `build/libs/javadsk-x.x.x.jar` (`x.x.x` = la version courante,
-définie dans `build.gradle.kts`).
+Deux jars exécutables sont générés versionnés (`x.x.x`, défini dans
+`build.gradle.kts` à la racine du projet) :
 
-## Utilisation
+- `build/libs/javadsk-x.x.x.jar` — CLI
+- `gui/build/libs/gui-x.x.x.jar` — interface graphique (voir [Interface graphique](#interface-graphique))
+
+## Utilisation CLI
 
 ```
 java -jar build/libs/javadsk-x.x.x.jar --help
@@ -227,6 +231,47 @@ encodage corromprait les octets CPC non-ASCII).
 
 Testé (décodage → réencodage → comparaison) sur plusieurs milliers de fichiers Basic réels issus de [DSK TOSEC](https://www.tosecdev.org/).
 
+## Interface graphique
+
+Sous-projet `gui/` (Swing + [FlatLaf](https://github.com/JFormDesigner/FlatLaf)) : reprend
+directement les mêmes classes `dsk.*` que la CLI.
+
+### Utilisation
+
+```
+java -jar gui/build/libs/gui-x.x.x.jar
+java -jar gui/build/libs/gui-x.x.x.jar image.dsk                    # ouvre directement une image
+java -jar gui/build/libs/gui-x.x.x.jar archive.zip antregob.dsk     # archive à plusieurs images, équivalent GUI de --entry
+```
+
+Sans le 2e argument, si l'archive contient plusieurs images, un sélecteur s'affiche pour choisir laquelle ouvrir.
+
+### Fonctionnalité
+
+| Fonctionnalité                                                            | Équivalent CLI             |
+|---------------------------------------------------------------------------|----------------------------|
+| Catalogue (table triable)                                                 | `list`                     |
+| Ouvrir une image depuis une archive `.7z`/`.zip` (sélecteur si plusieurs) | `list archive.zip --entry` |
+| Extraire (normal / brut AMSDOS)                                           | `extract`                  |
+| Visualisation : Ascii / Hex                                               | `ascii`, `hex`             |
+| Visualisation  : Basic (compact / `--spaced`)                             | `basic`                    |
+| Visualisation : Header AMSDOS                                             | `header`                   |
+| Importer un fichier                                                       | `put`                      |
+| Supprimer un fichier                                                      | `remove`                   |
+| Créer une image vierge                                                    | `new`                      |
+
+> [!NOTE]
+> Importer/supprimer un fichier n'est possible que sur une image `.dsk`/`.edsk` directe, jamais
+> depuis une archive (comme `put`/`remove` en CLI) : ouvrir le fichier `.dsk` directement pour ça.
+
+Menu **Thèmes** : les 4 thèmes de base FlatLaf (Clair, Sombre, IntelliJ, Darcula) plus tout le pack
+[FlatLaf IntelliJ Themes](https://github.com/JFormDesigner/FlatLaf/tree/main/flatlaf-intellij-themes)
+(Arc Dark, Dracula, One Dark, Nord, Solarized, Material...).
+
+> [!TIP]
+> Dans les fenêtres de Visualisation (Ascii/Hex/Basic), le menu **Fichier** de la fenêtre permet
+> d'**enregistrer** le résultat sur disque ou de le **copier dans le presse-papier**.
+
 ## Architecture
 
 | Package       | Rôle                                                    |
@@ -238,6 +283,16 @@ Testé (décodage → réencodage → comparaison) sur plusieurs milliers de fic
 | `dsk.basic`   | détokenisation, retokenisation et jeu de caractères CPC |
 | `dsk.hex`     | dump hexadécimal                                        |
 | `dsk.cli`     | interface en ligne de commande                          |
+
+Sous-projet `gui/` (interface graphique)
+
+| Package              | Rôle                                                                                 |
+|----------------------|--------------------------------------------------------------------------------------|
+| `dsk.gui`            | point d'entrée (`MainWindow`)                                                        |
+| `dsk.gui.model`      | état du disque ouvert et modèle de la table du catalogue                             |
+| `dsk.gui.view`       | fenêtre principale et boîtes de dialogue Swing/FlatLaf                               |
+| `dsk.gui.controller` | actions du GUI (orchestration dialogues → service → mise à jour vue)                 |
+| `dsk.gui.service`    | logique métier pure (put/remove/extract), sans dépendance Swing, testée unitairement |
 
 ## Performance
 
