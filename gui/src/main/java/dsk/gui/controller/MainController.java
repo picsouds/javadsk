@@ -2,6 +2,7 @@ package dsk.gui.controller;
 
 import dsk.DiskImage;
 import dsk.amsdos.AmsdosHeader;
+import dsk.amsdos.BasicProtect;
 import dsk.basic.BasicDetokenizer;
 import dsk.cpm.DiskFormat;
 import dsk.gui.model.CatalogTableModel;
@@ -142,7 +143,12 @@ public final class MainController {
         if (name == null) {
             return;
         }
-        byte[] payload = AmsdosHeader.payloadOf(session.rawDataOf(name));
+        byte[] raw = session.rawDataOf(name);
+        AmsdosHeader header = AmsdosHeader.parse(raw);
+        byte[] payload = AmsdosHeader.payloadOf(raw);
+        if (header.isValid() && header.fileType == AmsdosHeader.TYPE_BASIC_PROTECTED) {
+            payload = BasicProtect.decode(payload);
+        }
         String listing = spaced ? BasicDetokenizer.spacedListing(payload) : BasicDetokenizer.listing(payload);
         // UTF-8 : même encodage que 'basic --spaced' en CLI, requis pour réinjecter avec 'put --tokenize'.
         TextViewerDialog.show(frame, (spaced ? "Basic --spaced - " : "Basic - ") + name, listing, StandardCharsets.UTF_8);

@@ -1,6 +1,7 @@
 package dsk.cli;
 
 import dsk.amsdos.AmsdosHeader;
+import dsk.amsdos.BasicProtect;
 import dsk.basic.BasicDetokenizer;
 import dsk.basic.BasicTraceEvent;
 import picocli.CommandLine.Command;
@@ -38,7 +39,11 @@ public class BasicCommand extends AbstractTargetFileCommand {
 
     @Override
     int run(PrintWriter out, byte[] raw) throws IOException {
+        AmsdosHeader header = AmsdosHeader.parse(raw);
         byte[] payload = AmsdosHeader.payloadOf(raw);
+        if (header.isValid() && header.fileType == AmsdosHeader.TYPE_BASIC_PROTECTED) {
+            payload = BasicProtect.decode(payload);
+        }
 
         // UTF-8 direct sur stdout, pas la PrintWriter de picocli (charset JVM non garanti) :
         StringBuilder output = new StringBuilder();

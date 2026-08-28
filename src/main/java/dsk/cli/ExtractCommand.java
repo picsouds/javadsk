@@ -2,6 +2,7 @@ package dsk.cli;
 
 import dsk.DiskImage;
 import dsk.amsdos.AmsdosHeader;
+import dsk.amsdos.BasicProtect;
 import dsk.cpm.Catalog;
 import dsk.cpm.CatalogEntry;
 import picocli.CommandLine.Command;
@@ -68,6 +69,9 @@ public class ExtractCommand extends AbstractReadCommand {
                         : "brut, sans header AMSDOS détecté";
             } else if (header.isValid()) {
                 payload = AmsdosHeader.payloadOf(raw);
+                if (header.fileType == AmsdosHeader.TYPE_BASIC_PROTECTED) {
+                    payload = BasicProtect.decode(payload);
+                }
                 note = header.fileTypeLabel() + String.format(" load=0x%04X exec=0x%04X", header.loadAddress, header.entryAddress);
             } else {
                 payload = raw; // pas de header détecté : on écrit tel quel (ASCII/BASIC non protégé, etc.)

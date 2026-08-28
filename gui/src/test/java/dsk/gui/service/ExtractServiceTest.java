@@ -1,6 +1,7 @@
 package dsk.gui.service;
 
 import dsk.amsdos.AmsdosHeader;
+import dsk.amsdos.BasicProtect;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -43,6 +44,23 @@ class ExtractServiceTest {
 
         assertEquals(payload.length, length);
         assertArrayEquals(payload, Files.readAllBytes(outFile));
+    }
+
+    @Test
+    void withoutKeepHeaderDecodesABasicProtectedPayload(@TempDir Path tempDir) throws IOException {
+        byte[] plain = {1, 2, 3, 4};
+        byte[] encoded = BasicProtect.decode(plain);
+        byte[] header = AmsdosHeader.buildBytes(0, "PROG", "BAS", AmsdosHeader.TYPE_BASIC_PROTECTED,
+                0x170, encoded.length, 0);
+        byte[] raw = new byte[header.length + encoded.length];
+        System.arraycopy(header, 0, raw, 0, header.length);
+        System.arraycopy(encoded, 0, raw, header.length, encoded.length);
+        Path outFile = tempDir.resolve("out.bin");
+
+        int length = new ExtractService().extract(raw, false, outFile);
+
+        assertEquals(plain.length, length);
+        assertArrayEquals(plain, Files.readAllBytes(outFile));
     }
 
     @Test

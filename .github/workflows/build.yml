@@ -109,7 +109,7 @@ jobs:
           # un jar d'une autre version si l'un ou l'autre build/libs en contient plusieurs.
           TAG=${GITHUB_REF_NAME}
           CLI_JAR="artifacts/build/libs/javadsk-${TAG}.jar"
-          GUI_JAR="artifacts/gui/build/libs/gui-${TAG}.jar"
+          GUI_JAR="artifacts/gui/build/libs/javadsk-gui-${TAG}.jar"
           if [ ! -f "$CLI_JAR" ] || [ ! -f "$GUI_JAR" ]; then
             echo "Error: expected both CLI and GUI jars for tag ${TAG}, got CLI='$CLI_JAR' (exists: $(test -f "$CLI_JAR" && echo yes || echo no)) GUI='$GUI_JAR' (exists: $(test -f "$GUI_JAR" && echo yes || echo no))"
             exit 1

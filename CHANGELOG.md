@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3 - 2026-08-28
+
+### Ajouté
+
+- `dsk.amsdos.BasicProtect` : déchiffrement du "Basic protégé" AMSDOS (BASIC `SAVE ,P`).
+
 ## 1.0.2 - 2026-08-27
 
 ### Ajouté

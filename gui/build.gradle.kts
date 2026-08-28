@@ -6,6 +6,10 @@ plugins {
 
 version = rootProject.version
 
+base {
+    archivesName.set("javadsk-gui")
+}
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))

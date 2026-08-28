@@ -1,6 +1,7 @@
 package dsk.gui.service;
 
 import dsk.amsdos.AmsdosHeader;
+import dsk.amsdos.BasicProtect;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,7 +14,15 @@ public final class ExtractService {
     @SuppressWarnings("PathTraversal")
     public int extract(byte[] raw, boolean keepHeader, Path outFile) throws IOException {
         AmsdosHeader header = AmsdosHeader.parse(raw);
-        byte[] payload = keepHeader || !header.isValid() ? raw : AmsdosHeader.payloadOf(raw);
+        byte[] payload;
+        if (keepHeader || !header.isValid()) {
+            payload = raw;
+        } else {
+            payload = AmsdosHeader.payloadOf(raw);
+            if (header.fileType == AmsdosHeader.TYPE_BASIC_PROTECTED) {
+                payload = BasicProtect.decode(payload);
+            }
+        }
         Files.write(outFile, payload);
         return payload.length;
     }

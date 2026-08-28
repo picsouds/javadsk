@@ -30,8 +30,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
 
 /** La fenêtre principale : catalogue en table, menus, barre de statut. Toute la logique métier est dans MainController. */
 public final class MainFrame extends JFrame {
@@ -39,7 +37,6 @@ public final class MainFrame extends JFrame {
     private final CatalogTableModel tableModel = new CatalogTableModel();
     private final JTable table = new JTable(tableModel);
     private final JLabel statusBar = new JLabel(" ");
-    private final List<JMenu> basicMenus = new ArrayList<>();
     // transient : JFrame implémente Serializable par héritage AWT, jamais utilisé en pratique ici.
     private final transient MainController controller;
 
@@ -53,8 +50,6 @@ public final class MainFrame extends JFrame {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setComponentPopupMenu(buildTableContextMenu());
         table.addMouseListener(new SelectRowOnRightClick());
-        table.getSelectionModel().addListSelectionListener(e -> updateBasicMenuEnabled());
-        updateBasicMenuEnabled();
         add(new JScrollPane(table), BorderLayout.CENTER);
         add(statusBar, BorderLayout.SOUTH);
 
@@ -171,14 +166,7 @@ public final class MainFrame extends JFrame {
         JMenu basicMenu = new JMenu("Basic");
         basicMenu.add(simpleMenuItem("Listing (compact)", () -> controller.onBasic(false)));
         basicMenu.add(simpleMenuItem("Listing espacé (--spaced)", () -> controller.onBasic(true)));
-        basicMenus.add(basicMenu);
         return basicMenu;
-    }
-
-    private void updateBasicMenuEnabled() {
-        int row = table.getSelectedRow();
-        boolean enabled = row >= 0 && "Basic".equals(tableModel.getValueAt(row, CatalogTableModel.COL_TYPE));
-        basicMenus.forEach(menu -> menu.setEnabled(enabled));
     }
 
     private JMenuItem simpleMenuItem(String label, Runnable action) {

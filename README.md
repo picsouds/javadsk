@@ -17,7 +17,7 @@ Le projet permet de :
 - parcourir le catalogue CP/M (formats Data, System, IBM)
 - extraire des fichiers
 - détecter, valider et afficher le détail des headers AMSDOS
-- afficher un programme BASIC en clair (listing compact, comme `iDSK -b`), ou **avec les espaces d'un
+- afficher un programme BASIC/***BASIC Protégé*** en clair (listing compact, comme `iDSK -b`), ou **avec les espaces d'un
   vrai `LIST` CPC (`--spaced`)**
 - **retokeniser un listing BASIC édité en texte vers le format tokenisé CPC** (vrai compilateur
     texte → bytes)
@@ -39,7 +39,7 @@ Deux jars exécutables sont générés versionnés (`x.x.x`, défini dans
 `build.gradle.kts` à la racine du projet) :
 
 - `build/libs/javadsk-x.x.x.jar` — CLI
-- `gui/build/libs/gui-x.x.x.jar` — interface graphique (voir [Interface graphique](#interface-graphique))
+- `gui/build/libs/javadsk-gui-x.x.x.jar` — interface graphique (voir [Interface graphique](#interface-graphique))
 
 ## Utilisation CLI
 
@@ -239,9 +239,9 @@ directement les mêmes classes `dsk.*` que la CLI.
 ### Utilisation
 
 ```
-java -jar gui/build/libs/gui-x.x.x.jar
-java -jar gui/build/libs/gui-x.x.x.jar image.dsk                    # ouvre directement une image
-java -jar gui/build/libs/gui-x.x.x.jar archive.zip antregob.dsk     # archive à plusieurs images, équivalent GUI de --entry
+java -jar gui/build/libs/javadsk-gui-x.x.x.jar
+java -jar gui/build/libs/javadsk-gui-x.x.x.jar image.dsk                    # ouvre directement une image
+java -jar gui/build/libs/javadsk-gui-x.x.x.jar archive.zip antregob.dsk     # archive à plusieurs images, équivalent GUI de --entry
 ```
 
 Sans le 2e argument, si l'archive contient plusieurs images, un sélecteur s'affiche pour choisir laquelle ouvrir.
@@ -263,10 +263,6 @@ Sans le 2e argument, si l'archive contient plusieurs images, un sélecteur s'aff
 > [!NOTE]
 > Importer/supprimer un fichier n'est possible que sur une image `.dsk`/`.edsk` directe, jamais
 > depuis une archive (comme `put`/`remove` en CLI) : ouvrir le fichier `.dsk` directement pour ça.
-
-Menu **Thèmes** : les 4 thèmes de base FlatLaf (Clair, Sombre, IntelliJ, Darcula) plus tout le pack
-[FlatLaf IntelliJ Themes](https://github.com/JFormDesigner/FlatLaf/tree/main/flatlaf-intellij-themes)
-(Arc Dark, Dracula, One Dark, Nord, Solarized, Material...).
 
 > [!TIP]
 > Dans les fenêtres de Visualisation (Ascii/Hex/Basic), le menu **Fichier** de la fenêtre permet
