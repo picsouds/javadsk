@@ -27,7 +27,7 @@ repositories {
 dependencies {
     implementation(project(":"))
     implementation("com.formdev:flatlaf:3.7.2")
-    implementation("com.formdev:flatlaf-intellij-themes:3.7.2")
+    implementation("com.formdev:flatlaf-intellij-themes:3.8")
 
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
